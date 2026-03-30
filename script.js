@@ -283,16 +283,26 @@ if (projectsGrid) {
     requestAnimationFrame(animateScroll);
   }
 
+  const cards = Array.from(projectsGrid.children);
+  cards.forEach(card => {
+    const clone = card.cloneNode(true);
+    clone.classList.remove('reveal');
+    clone.classList.add('visible');
+    clone.style.opacity = '1';
+    clone.style.transform = 'none';
+    projectsGrid.appendChild(clone);
+  });
+
   const startScroll = () => {
     return setInterval(() => {
       const card = projectsGrid.querySelector('.project-card');
       const shift = card ? card.offsetWidth + 24 : 344;
+      const originalLengthPx = shift * cards.length;
       
-      let targetScroll = projectsGrid.scrollLeft + shift;
-      if (projectsGrid.scrollLeft + projectsGrid.clientWidth >= projectsGrid.scrollWidth - 10) {
-        targetScroll = 0;
+      if (projectsGrid.scrollLeft >= originalLengthPx) {
+         projectsGrid.scrollLeft -= originalLengthPx;
       }
-      smoothScrollTo(projectsGrid, targetScroll, 1200); // 1.2s ultra smooth
+      smoothScrollTo(projectsGrid, projectsGrid.scrollLeft + shift, 1200);
     }, 5000);
   };
   
@@ -311,9 +321,12 @@ if (projectsGrid) {
           clearInterval(scrollInterval);
           const card = projectsGrid.querySelector('.project-card');
           const shift = card ? card.offsetWidth + 24 : 344;
-          let target = projectsGrid.scrollLeft - shift;
-          if (target < 0) target = projectsGrid.scrollWidth - projectsGrid.clientWidth;
-          smoothScrollTo(projectsGrid, target, 800);
+          const originalLengthPx = shift * cards.length;
+          
+          if (projectsGrid.scrollLeft <= 5) { // 5px buffer
+              projectsGrid.scrollLeft += originalLengthPx;
+          }
+          smoothScrollTo(projectsGrid, projectsGrid.scrollLeft - shift, 800);
           scrollInterval = startScroll();
       });
 
@@ -321,9 +334,12 @@ if (projectsGrid) {
           clearInterval(scrollInterval);
           const card = projectsGrid.querySelector('.project-card');
           const shift = card ? card.offsetWidth + 24 : 344;
-          let target = projectsGrid.scrollLeft + shift;
-          if (target + projectsGrid.clientWidth >= projectsGrid.scrollWidth - 10) target = 0;
-          smoothScrollTo(projectsGrid, target, 800);
+          const originalLengthPx = shift * cards.length;
+          
+          if (projectsGrid.scrollLeft >= originalLengthPx - 5) { // 5px buffer
+              projectsGrid.scrollLeft -= originalLengthPx;
+          }
+          smoothScrollTo(projectsGrid, projectsGrid.scrollLeft + shift, 800);
           scrollInterval = startScroll();
       });
   }
